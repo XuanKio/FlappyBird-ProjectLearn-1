@@ -1,27 +1,21 @@
 using UnityEngine;
 
-public sealed class BackGroundScroller : MonoBehaviour
+public sealed class LoopingSpriteScroller : MonoBehaviour
 {
     [SerializeField] private Transform[] segments;
-    [SerializeField] private Camera targetCamera;
     [SerializeField] private float speed = 1.5f;
+    [SerializeField] private float loopStartX = 7.02f;
+    [SerializeField] private float loopEndX = -1.76f;
     [SerializeField] private bool moveLeft = true;
     [SerializeField] private bool playOnStart = true;
 
-    private SpriteRenderer[] segmentRenderers;
     private bool isRunning;
 
     public float Speed => speed;
 
     private void Awake()
     {
-        if (targetCamera == null)
-        {
-            targetCamera = Camera.main;
-        }
-
-        CacheRenderers();
-        isRunning = playOnStart;
+        isRunning = playOnStart && FindObjectOfType<GameplayController>() == null;
     }
 
     private void Update()
@@ -32,7 +26,7 @@ public sealed class BackGroundScroller : MonoBehaviour
         }
 
         MoveSegments();
-        WrapSegments();
+        LoopSegments();
     }
 
     public void Play()
@@ -50,23 +44,9 @@ public sealed class BackGroundScroller : MonoBehaviour
         speed = Mathf.Max(0f, value);
     }
 
-    private void CacheRenderers()
+    private void OnValidate()
     {
-        if (segments == null)
-        {
-            segmentRenderers = new SpriteRenderer[0];
-            return;
-        }
-
-        segmentRenderers = new SpriteRenderer[segments.Length];
-
-        for (int i = 0; i < segments.Length; i++)
-        {
-            if (segments[i] != null)
-            {
-                segmentRenderers[i] = segments[i].GetComponent<SpriteRenderer>();
-            }
-        }
+        speed = Mathf.Max(0f, speed);
     }
 
     private void MoveSegments()
@@ -83,91 +63,29 @@ public sealed class BackGroundScroller : MonoBehaviour
         }
     }
 
-    private void WrapSegments()
+    private void LoopSegments()
     {
-        if (targetCamera == null)
+        for (int i = 0; i < segments.Length; i++)
         {
-            return;
-        }
+            Transform segment = segments[i];
 
-        float leftEdge = GetCameraEdgeX(0f);
-        float rightEdge = GetCameraEdgeX(1f);
-
-        for (int i = 0; i < segmentRenderers.Length; i++)
-        {
-            SpriteRenderer segmentRenderer = segmentRenderers[i];
-
-            if (segmentRenderer == null)
+            if (segment == null)
             {
                 continue;
             }
 
-            if (moveLeft && segmentRenderer.bounds.max.x < leftEdge)
+            Vector3 position = segment.position;
+
+            if (moveLeft && position.x <= loopEndX)
             {
-                MoveSegmentAfterRightMost(i);
+                position.x = loopStartX;
+                segment.position = position;
             }
-            else if (!moveLeft && segmentRenderer.bounds.min.x > rightEdge)
+            else if (!moveLeft && position.x >= loopStartX)
             {
-                MoveSegmentBeforeLeftMost(i);
-            }
-        }
-    }
-
-    private float GetCameraEdgeX(float viewportX)
-    {
-        float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z - transform.position.z);
-        Vector3 edge = targetCamera.ViewportToWorldPoint(new Vector3(viewportX, 0f, distanceFromCamera));
-        return edge.x;
-    }
-
-    private void MoveSegmentAfterRightMost(int segmentIndex)
-    {
-        SpriteRenderer segmentRenderer = segmentRenderers[segmentIndex];
-        float targetCenterX = GetRightMostEdge() + segmentRenderer.bounds.extents.x;
-        MoveSegmentCenterX(segmentIndex, targetCenterX);
-    }
-
-    private void MoveSegmentBeforeLeftMost(int segmentIndex)
-    {
-        SpriteRenderer segmentRenderer = segmentRenderers[segmentIndex];
-        float targetCenterX = GetLeftMostEdge() - segmentRenderer.bounds.extents.x;
-        MoveSegmentCenterX(segmentIndex, targetCenterX);
-    }
-
-    private void MoveSegmentCenterX(int segmentIndex, float targetCenterX)
-    {
-        float currentCenterX = segmentRenderers[segmentIndex].bounds.center.x;
-        float deltaX = targetCenterX - currentCenterX;
-        segments[segmentIndex].position += new Vector3(deltaX, 0f, 0f);
-    }
-
-    private float GetRightMostEdge()
-    {
-        float rightMostEdge = float.NegativeInfinity;
-
-        for (int i = 0; i < segmentRenderers.Length; i++)
-        {
-            if (segmentRenderers[i] != null)
-            {
-                rightMostEdge = Mathf.Max(rightMostEdge, segmentRenderers[i].bounds.max.x);
+                position.x = loopEndX;
+                segment.position = position;
             }
         }
-
-        return rightMostEdge;
-    }
-
-    private float GetLeftMostEdge()
-    {
-        float leftMostEdge = float.PositiveInfinity;
-
-        for (int i = 0; i < segmentRenderers.Length; i++)
-        {
-            if (segmentRenderers[i] != null)
-            {
-                leftMostEdge = Mathf.Min(leftMostEdge, segmentRenderers[i].bounds.min.x);
-            }
-        }
-
-        return leftMostEdge;
     }
 }

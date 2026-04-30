@@ -47,6 +47,7 @@ public sealed class PlayingState : IGameState
 
         scoreService.ResetScore();
 
+        playerMovement.SetVisible(true);
         playerMovement.EnableMovement();
 
         if (backgroundScroller != null)

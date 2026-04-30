@@ -21,6 +21,14 @@ public sealed class GameplayController : MonoBehaviour
     private GameStateMachine stateMachine;
     private ScoreService scoreService;
 
+    public IGameEventBus EventBus => eventBus;
+    public GameStateId CurrentStateId => stateMachine != null
+        ? stateMachine.CurrentStateId
+        : GameStateId.Ready;
+    public int CurrentScore => scoreService != null
+        ? scoreService.CurrentScore
+        : 0;
+
     private void Awake()
     {
         ResolveReferences();
@@ -44,6 +52,7 @@ public sealed class GameplayController : MonoBehaviour
         }
 
         playerMovement.Construct(inputReader);
+        playerMovement.SetVisible(false);
         playerCollision.Construct(eventBus);
         pipeSpawner.Construct(eventBus);
 

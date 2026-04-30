@@ -5,6 +5,8 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Renderer[] visualRenderers;
+    [SerializeField] private Animator animator;
 
     [Header("Settings")]
     [SerializeField] private float jumpVelocity = 5f;
@@ -27,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private void Reset()
     {
         rb = GetComponent<Rigidbody2D>();
+        ResolveVisualReferences();
         ApplyRigidbodySettings();
     }
 
@@ -38,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         ApplyRigidbodySettings();
+        ResolveVisualReferences();
     }
 
     public void Construct(IGameplayInputReader inputReader)
@@ -70,6 +74,24 @@ public class PlayerMovement : MonoBehaviour
         jumpRequested = false;
         rb.velocity = Vector2.zero;
         transform.rotation = Quaternion.identity;
+    }
+
+    public void SetVisible(bool visible)
+    {
+        ResolveVisualReferences();
+
+        for (int i = 0; i < visualRenderers.Length; i++)
+        {
+            if (visualRenderers[i] != null)
+            {
+                visualRenderers[i].enabled = visible;
+            }
+        }
+
+        if (animator != null)
+        {
+            animator.enabled = visible;
+        }
     }
 
     private void Update()
@@ -153,12 +175,27 @@ public class PlayerMovement : MonoBehaviour
             : RigidbodyInterpolation2D.None;
     }
 
+    private void ResolveVisualReferences()
+    {
+        if (visualRenderers == null || visualRenderers.Length == 0)
+        {
+            visualRenderers = GetComponentsInChildren<Renderer>(true);
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>(true);
+        }
+    }
+
     private void OnValidate()
     {
         if (rb == null)
         {
             rb = GetComponent<Rigidbody2D>();
         }
+
+        ResolveVisualReferences();
 
         jumpVelocity = Mathf.Max(0f, jumpVelocity);
         maxFallSpeed = Mathf.Min(0f, maxFallSpeed);

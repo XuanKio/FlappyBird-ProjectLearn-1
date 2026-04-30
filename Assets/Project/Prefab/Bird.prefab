@@ -214,6 +214,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 6993072046626664885}
+  visualRenderers:
+  - {fileID: 1694109174024923236}
+  animator: {fileID: 2788446750624162486}
   jumpVelocity: 7
   maxFallSpeed: -8
   interpolateMovement: 1

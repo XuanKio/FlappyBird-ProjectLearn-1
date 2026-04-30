@@ -21,6 +21,7 @@ public sealed class ReadyState : IGameState
         if (playerMovement != null)
         {
             playerMovement.DisableMovement();
+            playerMovement.SetVisible(false);
         }
 
         if (backgroundScroller != null)

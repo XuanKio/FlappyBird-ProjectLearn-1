@@ -30,6 +30,7 @@ public sealed class GameOverState : IGameState
         if (playerMovement != null)
         {
             playerMovement.DisableMovement();
+            playerMovement.SetVisible(true);
         }
 
         if (backgroundScroller != null)

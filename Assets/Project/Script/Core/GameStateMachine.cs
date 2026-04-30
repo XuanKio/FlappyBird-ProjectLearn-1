@@ -4,7 +4,7 @@ public sealed class GameStateMachine
 {
     private readonly Dictionary<GameStateId, IGameState> states = new();
     private readonly IGameEventBus eventBus;
-
+    
     private IGameState currentState;
 
     public GameStateId CurrentStateId => currentState != null

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58a9daeb7a4c49e3b43e267e3b8cb126, type: 3}
+  m_Name: GameplayAudioContainer
+  m_EditorClassIdentifier: 
+  pointClip: {fileID: 8300000, guid: b341fbb28ef475249a38966a55b74c09, type: 3}
+  hitClip: {fileID: 8300000, guid: c48afc593e562aa44817b32c126852a4, type: 3}
+  wingClip: {fileID: 8300000, guid: a55326c1980416d4b80d8c3ace0d5dad, type: 3}
+  dieClip: {fileID: 8300000, guid: b274776d1a1249d43aff24d69c059d5e, type: 3}
+  volume: 1

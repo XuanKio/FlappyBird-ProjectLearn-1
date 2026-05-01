@@ -37,22 +37,13 @@ public class PlayerInstaller : MonoBehaviour
 
     private IGameplayInputReader ResolveInputReader()
     {
-        if (inputReaderBehaviour is IGameplayInputReader serializedInputReader)
-        {
-            return serializedInputReader;
-        }
+        IGameplayInputReader resolvedInputReader = GameplayInputReaderResolver.Resolve(
+            inputReaderBehaviour,
+            this,
+            out MonoBehaviour resolvedBehaviour
+        );
 
-        MonoBehaviour[] behaviours = GetComponents<MonoBehaviour>();
-
-        for (int i = 0; i < behaviours.Length; i++)
-        {
-            if (behaviours[i] is IGameplayInputReader discoveredInputReader)
-            {
-                inputReaderBehaviour = behaviours[i];
-                return discoveredInputReader;
-            }
-        }
-
-        return null;
+        inputReaderBehaviour = resolvedBehaviour;
+        return resolvedInputReader;
     }
 }

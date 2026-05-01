@@ -1,15 +1,15 @@
 public sealed class ReadyState : IGameState
 {
-    private readonly PlayerMovement playerMovement;
-    private readonly LoopingSpriteScroller backgroundScroller;
-    private readonly PipeSpawner pipeSpawner;
+    private readonly IPlayerMovementController playerMovement;
+    private readonly IPlayableSystem backgroundScroller;
+    private readonly IPlayableSystem pipeSpawner;
 
     public GameStateId StateId => GameStateId.Ready;
 
     public ReadyState(
-        PlayerMovement playerMovement,
-        LoopingSpriteScroller backgroundScroller,
-        PipeSpawner pipeSpawner)
+        IPlayerMovementController playerMovement,
+        IPlayableSystem backgroundScroller,
+        IPlayableSystem pipeSpawner)
     {
         this.playerMovement = playerMovement;
         this.backgroundScroller = backgroundScroller;

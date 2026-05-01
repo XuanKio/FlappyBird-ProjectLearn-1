@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public sealed class PlayerCollision : MonoBehaviour
+public sealed class PlayerCollision : MonoBehaviour, IPlayerDeathState
 {
     private IGameEventBus eventBus;
     private bool isDead;
@@ -42,6 +42,7 @@ public sealed class PlayerCollision : MonoBehaviour
     private void Die()
     {
         isDead = true;
+        eventBus?.Publish(new PlayerHitEvent());
         eventBus?.Publish(new PlayerDiedEvent());
     }
 }

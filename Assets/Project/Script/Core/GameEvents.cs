@@ -2,6 +2,14 @@ public readonly struct PlayerDiedEvent
 {
 }
 
+public readonly struct PlayerHitEvent
+{
+}
+
+public readonly struct PlayerFlappedEvent
+{
+}
+
 public readonly struct PipePassedEvent
 {
 }

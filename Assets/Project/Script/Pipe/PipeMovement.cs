@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PipeMovement : MonoBehaviour
+public class PipeMovement : MonoBehaviour, IPlayableSystem, ISpeedConfigurable
 {
     [SerializeField] private float pipeSpeed = 3f;
     private bool isMoving = false;

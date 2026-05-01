@@ -9,6 +9,8 @@ public sealed class GameplayUIController : MonoBehaviour
     [SerializeField] private GameObject gameOverRoot;
     [SerializeField] private SpriteNumberDisplay finalScoreDisplay;
 
+    private IGameplayReadModel gameplayReadModel;
+    private IGameplayCommands gameplayCommands;
     private IGameEventBus eventBus;
     private bool isSubscribed;
 
@@ -26,20 +28,8 @@ public sealed class GameplayUIController : MonoBehaviour
     {
         ResolveReferences();
         TrySubscribe();
-        RefreshState(gameplayController != null ? gameplayController.CurrentStateId : GameStateId.Ready);
-        SetScore(gameplayController != null ? gameplayController.CurrentScore : 0, false);
-    }
-
-    private void Update()
-    {
-        if (gameplayController == null ||
-            gameplayController.CurrentStateId != GameStateId.Ready ||
-            !Input.GetMouseButtonDown(0))
-        {
-            return;
-        }
-
-        gameplayController.StartGame();
+        RefreshState(gameplayReadModel != null ? gameplayReadModel.CurrentStateId : GameStateId.Ready);
+        SetScore(gameplayReadModel != null ? gameplayReadModel.CurrentScore : 0, false);
     }
 
     private void OnDisable()
@@ -65,6 +55,16 @@ public sealed class GameplayUIController : MonoBehaviour
         }
     }
 
+    public void StartGame()
+    {
+        gameplayCommands?.StartGame();
+    }
+
+    public void PlayAgain()
+    {
+        gameplayCommands?.PlayAgain();
+    }
+
     private void RefreshState(GameStateId stateId)
     {
         SetActive(gameStartPrompt, stateId == GameStateId.Ready);
@@ -77,7 +77,7 @@ public sealed class GameplayUIController : MonoBehaviour
         }
         else if (stateId == GameStateId.GameOver && finalScoreDisplay != null)
         {
-            finalScoreDisplay.SetValue(gameplayController != null ? gameplayController.CurrentScore : 0, false);
+            finalScoreDisplay.SetValue(gameplayReadModel != null ? gameplayReadModel.CurrentScore : 0, false);
         }
     }
 
@@ -95,6 +95,9 @@ public sealed class GameplayUIController : MonoBehaviour
         {
             gameplayController = FindObjectOfType<GameplayController>();
         }
+
+        gameplayReadModel = gameplayController;
+        gameplayCommands = gameplayController;
 
         if (gameStartPrompt == null)
         {
@@ -129,12 +132,12 @@ public sealed class GameplayUIController : MonoBehaviour
 
     private void TrySubscribe()
     {
-        if (isSubscribed || gameplayController == null || gameplayController.EventBus == null)
+        if (isSubscribed || gameplayReadModel == null || gameplayReadModel.EventBus == null)
         {
             return;
         }
 
-        eventBus = gameplayController.EventBus;
+        eventBus = gameplayReadModel.EventBus;
         eventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
         eventBus.Subscribe<ScoreChangedEvent>(OnScoreChanged);
         eventBus.Subscribe<GameOverEvent>(OnGameOver);

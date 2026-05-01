@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class GameplayController : MonoBehaviour
+public sealed class GameplayController : MonoBehaviour, IGameplayReadModel, IGameplayCommands
 {
     [Header("Player")]
     [SerializeField] private PlayerMovement playerMovement;
@@ -19,7 +19,7 @@ public sealed class GameplayController : MonoBehaviour
     private IGameplayInputReader inputReader;
     private IGameEventBus eventBus;
     private GameStateMachine stateMachine;
-    private ScoreService scoreService;
+    private IScoreService scoreService;
 
     public IGameEventBus EventBus => eventBus;
     public GameStateId CurrentStateId => stateMachine != null
@@ -51,7 +51,7 @@ public sealed class GameplayController : MonoBehaviour
             return;
         }
 
-        playerMovement.Construct(inputReader);
+        playerMovement.Construct(inputReader, eventBus);
         playerMovement.SetVisible(false);
         playerCollision.Construct(eventBus);
         pipeSpawner.Construct(eventBus);
@@ -127,10 +127,20 @@ public sealed class GameplayController : MonoBehaviour
             return;
         }
 
-        if (stateMachine.CurrentStateId == GameStateId.Ready &&
-            inputReader.JumpPressed)
+        if (!inputReader.JumpPressed)
         {
-            StartGame();
+            return;
+        }
+
+        switch (stateMachine.CurrentStateId)
+        {
+            case GameStateId.Ready:
+                StartGame();
+                break;
+
+            case GameStateId.GameOver:
+                PlayAgain();
+                break;
         }
     }
 
@@ -212,27 +222,13 @@ public sealed class GameplayController : MonoBehaviour
 
     private IGameplayInputReader ResolveInputReader()
     {
-        if (inputReaderBehaviour is IGameplayInputReader serializedInputReader)
-        {
-            return serializedInputReader;
-        }
+        IGameplayInputReader resolvedInputReader = GameplayInputReaderResolver.Resolve(
+            inputReaderBehaviour,
+            playerMovement,
+            out MonoBehaviour resolvedBehaviour
+        );
 
-        if (playerMovement == null)
-        {
-            return null;
-        }
-
-        MonoBehaviour[] behaviours = playerMovement.GetComponents<MonoBehaviour>();
-
-        for (int i = 0; i < behaviours.Length; i++)
-        {
-            if (behaviours[i] is IGameplayInputReader discoveredInputReader)
-            {
-                inputReaderBehaviour = behaviours[i];
-                return discoveredInputReader;
-            }
-        }
-
-        return null;
+        inputReaderBehaviour = resolvedBehaviour;
+        return resolvedInputReader;
     }
 }

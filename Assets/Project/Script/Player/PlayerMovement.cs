@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour, IPlayerMovementController
 {
     [Header("References")]
     [SerializeField] private Rigidbody2D rb;
@@ -23,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float downRotation = -70f;
 
     private IGameplayInputReader inputReader;
+    private IGameEventBus eventBus;
     private bool canMove;
     private bool jumpRequested;
 
@@ -44,9 +45,10 @@ public class PlayerMovement : MonoBehaviour
         ResolveVisualReferences();
     }
 
-    public void Construct(IGameplayInputReader inputReader)
+    public void Construct(IGameplayInputReader inputReader, IGameEventBus eventBus = null)
     {
         this.inputReader = inputReader;
+        this.eventBus = eventBus;
     }
 
     public void EnableMovement()
@@ -138,6 +140,7 @@ public class PlayerMovement : MonoBehaviour
         jumpRequested = false;
 
         rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
+        eventBus?.Publish(new PlayerFlappedEvent());
     }
 
     private void ClampFallSpeed()

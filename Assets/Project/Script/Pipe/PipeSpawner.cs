@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PipeSpawner : MonoBehaviour
+public class PipeSpawner : MonoBehaviour, IPlayableSystem
 {
     [Header("References")]
     [SerializeField] private Camera targetCamera;
@@ -42,6 +42,8 @@ public class PipeSpawner : MonoBehaviour
     private float timer;
     private bool isSpawning;
     private IGameEventBus eventBus;
+    private IRandomRange randomRange;
+    private IPipeSpawnDataFactory spawnDataFactory;
 
     public void Construct(IGameEventBus eventBus)
     {
@@ -54,6 +56,9 @@ public class PipeSpawner : MonoBehaviour
         {
             targetCamera = Camera.main;
         }
+
+        randomRange = new UnityRandomRange();
+        RebuildSpawnDataFactory();
     }
 
     private void Start()
@@ -106,8 +111,9 @@ public class PipeSpawner : MonoBehaviour
         }
 
         PipeObstacleType type = GetRandomType();
+        RebuildSpawnDataFactory();
 
-        PipeSpawnData spawnData = CreateSpawnData(type);
+        PipeSpawnData spawnData = spawnDataFactory.Create(type);
 
         float spawnX = GetCameraRightEdgeX() + pipePrefab.HalfWidth + spawnOffsetX;
 
@@ -141,87 +147,42 @@ public class PipeSpawner : MonoBehaviour
             return PipeObstacleType.FullPair;
         }
 
-        int index = Random.Range(0, spawnTypes.Length);
+        randomRange ??= new UnityRandomRange();
+
+        int index = randomRange.Range(0, spawnTypes.Length);
         return spawnTypes[index];
     }
 
-    private PipeSpawnData CreateSpawnData(PipeObstacleType type)
+    private void RebuildSpawnDataFactory()
     {
-        float playableTopY = upperMaxY;
-        float playableBottomY = lowerMinY;
-
-        switch (type)
+        if (pipePrefab == null)
         {
-            case PipeObstacleType.LowerOnly:
-                return CreateLowerOnlyData(playableBottomY, playableTopY);
-
-            case PipeObstacleType.UpperOnly:
-                return CreateUpperOnlyData(playableBottomY, playableTopY);
-
-            case PipeObstacleType.FullPair:
-            default:
-                return CreateFullPairData(playableBottomY, playableTopY);
-        }
-    }
-
-    private PipeSpawnData CreateFullPairData(float playableBottomY, float playableTopY)
-    {
-        float gapSize = Random.Range(minGapSize, maxGapSize);
-
-        float lowerPipeY = SafeRandom(lowerPipeMinY, lowerPipeMaxY);
-        float passageBottomY = lowerPipeY + pipePrefab.LowerHalfHeight;
-        float passageTopY = passageBottomY + gapSize;
-
-        return new PipeSpawnData(
-            PipeObstacleType.FullPair,
-            passageBottomY,
-            passageTopY,
-            playableBottomY,
-            playableTopY
-        );
-    }
-
-    private PipeSpawnData CreateLowerOnlyData(float playableBottomY, float playableTopY)
-    {
-        float lowerHalfHeight = pipePrefab.LowerHalfHeight;
-        float minLowerPipeY = Mathf.Max(lowerPipeMinY, playableBottomY + minSinglePipeHeight - lowerHalfHeight);
-        float maxLowerPipeY = Mathf.Min(lowerPipeMaxY, playableTopY - minSingleOpenHeight - lowerHalfHeight);
-
-        float lowerPipeY = SafeRandom(minLowerPipeY, maxLowerPipeY);
-        lowerPipeY = Mathf.Clamp(lowerPipeY, lowerPipeMinY, lowerPipeMaxY);
-        float lowerTopY = lowerPipeY + lowerHalfHeight;
-
-        return new PipeSpawnData(
-            PipeObstacleType.LowerOnly,
-            lowerTopY,
-            playableTopY,
-            playableBottomY,
-            playableTopY
-        );
-    }
-
-    private PipeSpawnData CreateUpperOnlyData(float playableBottomY, float playableTopY)
-    {
-        float upperPipeY = SafeRandom(upperPipeMinY, upperPipeMaxY);
-        float upperBottomY = Mathf.Max(playableBottomY + minSingleOpenHeight, upperPipeY - pipePrefab.UpperHalfHeight);
-
-        return new PipeSpawnData(
-            PipeObstacleType.UpperOnly,
-            playableBottomY,
-            upperBottomY,
-            playableBottomY,
-            playableTopY
-        );
-    }
-
-    private float SafeRandom(float min, float max)
-    {
-        if (min >= max)
-        {
-            return (min + max) * 0.5f;
+            spawnDataFactory = null;
+            return;
         }
 
-        return Random.Range(min, max);
+        randomRange ??= new UnityRandomRange();
+        spawnDataFactory = PipeSpawnDataFactory.CreateDefault(
+            CreateSpawnRules(),
+            pipePrefab,
+            randomRange
+        );
+    }
+
+    private PipeSpawnRules CreateSpawnRules()
+    {
+        return new PipeSpawnRules(
+            minGapSize,
+            maxGapSize,
+            minSingleOpenHeight,
+            minSinglePipeHeight,
+            upperMaxY,
+            lowerMinY,
+            upperPipeMinY,
+            upperPipeMaxY,
+            lowerPipeMinY,
+            lowerPipeMaxY
+        );
     }
 
     private float GetCameraRightEdgeX()

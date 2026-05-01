@@ -1,21 +1,21 @@
 public sealed class GameOverState : IGameState
 {
     private readonly IGameEventBus eventBus;
-    private readonly PlayerMovement playerMovement;
-    private readonly LoopingSpriteScroller backgroundScroller;
-    private readonly PipeSpawner pipeSpawner;
-    private readonly PipeCleaner pipeCleaner;
-    private readonly ScoreService scoreService;
+    private readonly IPlayerMovementController playerMovement;
+    private readonly IPlayableSystem backgroundScroller;
+    private readonly IPlayableSystem pipeSpawner;
+    private readonly IPipeCleaner pipeCleaner;
+    private readonly IScoreService scoreService;
 
     public GameStateId StateId => GameStateId.GameOver;
 
     public GameOverState(
         IGameEventBus eventBus,
-        PlayerMovement playerMovement,
-        LoopingSpriteScroller backgroundScroller,
-        PipeSpawner pipeSpawner,
-        PipeCleaner pipeCleaner,
-        ScoreService scoreService)
+        IPlayerMovementController playerMovement,
+        IPlayableSystem backgroundScroller,
+        IPlayableSystem pipeSpawner,
+        IPipeCleaner pipeCleaner,
+        IScoreService scoreService)
     {
         this.eventBus = eventBus;
         this.playerMovement = playerMovement;

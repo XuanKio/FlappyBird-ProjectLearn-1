@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class PipeCleaner : MonoBehaviour
+public sealed class PipeCleaner : MonoBehaviour, IPipeCleaner
 {
     public void ClearAllPipes()
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PipeObstacle : MonoBehaviour
+public class PipeObstacle : MonoBehaviour, IPipeObstacleMetrics
 {
     [Header("Upper Pipe")]
     [SerializeField] private GameObject upperPipeRoot;

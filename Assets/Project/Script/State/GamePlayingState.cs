@@ -2,27 +2,27 @@ using UnityEngine;
 
 public sealed class PlayingState : IGameState
 {
-    private readonly PlayerMovement playerMovement;
-    private readonly PlayerCollision playerCollision;
+    private readonly IPlayerMovementController playerMovement;
+    private readonly IPlayerDeathState playerCollision;
     private readonly Transform playerTransform;
     private readonly Vector3 playerStartPosition;
 
-    private readonly LoopingSpriteScroller backgroundScroller;
-    private readonly PipeSpawner pipeSpawner;
-    private readonly PipeCleaner pipeCleaner;
-    private readonly ScoreService scoreService;
+    private readonly IPlayableSystem backgroundScroller;
+    private readonly IPlayableSystem pipeSpawner;
+    private readonly IPipeCleaner pipeCleaner;
+    private readonly IScoreService scoreService;
 
     public GameStateId StateId => GameStateId.Playing;
 
     public PlayingState(
-        PlayerMovement playerMovement,
-        PlayerCollision playerCollision,
+        IPlayerMovementController playerMovement,
+        IPlayerDeathState playerCollision,
         Transform playerTransform,
         Vector3 playerStartPosition,
-        LoopingSpriteScroller backgroundScroller,
-        PipeSpawner pipeSpawner,
-        PipeCleaner pipeCleaner,
-        ScoreService scoreService)
+        IPlayableSystem backgroundScroller,
+        IPlayableSystem pipeSpawner,
+        IPipeCleaner pipeCleaner,
+        IScoreService scoreService)
     {
         this.playerMovement = playerMovement;
         this.playerCollision = playerCollision;

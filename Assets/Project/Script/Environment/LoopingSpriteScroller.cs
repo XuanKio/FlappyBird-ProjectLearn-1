@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class LoopingSpriteScroller : MonoBehaviour
+public sealed class LoopingSpriteScroller : MonoBehaviour, IPlayableSystem
 {
     [SerializeField] private Transform[] segments;
     [SerializeField] private float speed = 1.5f;

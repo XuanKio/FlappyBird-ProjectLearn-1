@@ -1,4 +1,4 @@
-public sealed class ScoreService
+public sealed class ScoreService : IScoreService
 {
     private readonly IGameEventBus eventBus;
 
